@@ -4,7 +4,7 @@
     mailman3_domains:
       - https://mailman.darwinproject.be
       - https://mailman.sciensano.be
-      - http://10.5.8.176/
+      - http://10.5.1.119/
     mailman3_django_superusers:
       - name: Yvan
         email: yvan.kombou@sciensano.be
@@ -31,7 +31,7 @@
         dmarc: 'yes'
         dkim: 'yes'
         authserv_id: https://mailman.darwinproject.be
-        trusted_authserv_ids: https://mailman.darwinproject.be, https://mailman.sciensano.be, http://10.5.8.176/
+        trusted_authserv_ids: https://mailman.darwinproject.be, https://mailman.sciensano.be, http://10.5.1.119/
 
     mailman3_django_config:
       secret_key: Ixelles1050
@@ -41,7 +41,7 @@
         default:
           ENGINE: django.db.backends.postgresql_psycopg2
           NAME: mailmanweb
-          HOST: '10.5.8.175'
+          HOST: '10.5.1.119'
       haystack_engine: xapian_backend.XapianEngine
 
     mailman3_extra_packages:
