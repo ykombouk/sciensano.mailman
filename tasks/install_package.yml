@@ -1,0 +1,23 @@
+---
+
+- name: Ensure supported OS for package installs
+  ansible.builtin.assert:
+    that:
+      - "ansible_distribution == 'Debian'"
+      - "mailman3_domains is not defined"
+    success_msg: "OS and configuration are supported for Mailman 3 installation by package"
+    fail_msg: "OS and configuration are not supported for Mailman 3 installation by package, set `mailman3_install_method` to `pip`"
+
+- name: Install Mailman and dependency packages
+  ansible.builtin.package:
+    name: "{{ mailman3_packages }}"
+
+- name: Create/update Django local settings
+  ansible.builtin.template:
+    src: "settings_local.py.j2"
+    dest: /etc/mailman3/mailman-web.py
+    group: "{{ __mailman3_web_group_name }}"
+    mode: "0640"
+    backup: "{{ mailman3_backup_configs }}"
+  notify:
+    - Restart mailman3-web service

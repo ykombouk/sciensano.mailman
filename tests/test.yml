@@ -1,5 +1,57 @@
----
-- hosts: localhost
-  remote_user: root
-  roles:
-    - sciensano.mailman
+- name: Install Mailman 3
+  hosts: mailman-p01
+  vars:
+    mailman3_domains:
+      - https://mailman.darwinproject.be
+      - https://mailman.sciensano.be
+      - http://10.5.8.176/
+    mailman3_django_superusers:
+      - name: Yvan
+        email: yvan.kombou@sciensano.be
+      - name: Wadih
+        email: wadih.bouasrof@sciensano.be
+    mailman3_core_api_admin_user: restadmin
+    mailman3_core_api_admin_pass: restpass
+    mailman3_archiver_key: sciensano
+
+    mailman3_config:
+      mailman:
+        site_owner: noreply@darwinproject.be
+      mta:
+        # bypass the content filter (amavisd-new) for Mailman messages since they were scanned on the way in
+        smtp_port: 10025
+      database:
+        class: mailman.database.postgresql.PostgreSQLDatabase
+        url: postgres://mailman:mailman@localhost/mailman
+      arc:
+        enabled: 'yes'
+        privkey: sciensano
+        selector: mail
+        domain: https://mailman.darwinproject.be
+        dmarc: 'yes'
+        dkim: 'yes'
+        authserv_id: https://mailman.darwinproject.be
+        trusted_authserv_ids: https://mailman.darwinproject.be, https://mailman.sciensano.be, http://10.5.8.176/
+
+    mailman3_django_config:
+      secret_key: Ixelles1050
+      use_x_forwarded_host: true
+      hyperkitty_attachment_folder: "{{ mailman3_web_var_dir }}/attachments"
+      databases:
+        default:
+          ENGINE: django.db.backends.postgresql_psycopg2
+          NAME: mailmanweb
+          HOST: '10.5.8.175'
+      haystack_engine: xapian_backend.XapianEngine
+
+    mailman3_extra_packages:
+      - psycopg2-binary
+      - xapian-haystack
+
+    mailman3_distribute_maps:
+      - host: all
+        mailman3_distribute_maps_dir: "{{ mailman3_distribute_maps_dir }}"
+        mailman3_postmap_command: /usr/sbin/postmap
+      - host: mx1.example.org
+      - host: mx2.example.org
+      - host: mx3.example.org

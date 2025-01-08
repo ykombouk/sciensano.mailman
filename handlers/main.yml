@@ -1,2 +1,33 @@
 ---
-# handlers file for sciensano.mailman
+
+- name: Reload systemd manager configuration
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+# invoke systemctl directly until someone implements https://github.com/ansible/ansible/issues/61763
+
+- name: Restart mailman3-core service
+  ansible.builtin.command: systemctl try-restart {{ mailman3_core_service_name }}.service
+  when:
+    - mailman3_process_manager == "systemd"
+    - ansible_virtualization_type != "docker"
+  tags:
+    - skip_ansible_lint
+
+- name: Restart mailman3-web service
+  ansible.builtin.command: systemctl try-restart {{ mailman3_web_service_name }}{{ '@' if mailman3_domains is defined else '' }}{{ item }}.service
+  loop: "{{ mailman3_domains | default(['']) }}"
+  when:
+    - mailman3_process_manager == "systemd"
+    - ansible_virtualization_type != "docker"
+  tags:
+    - skip_ansible_lint
+
+- name: Reload mailman3-web service
+  ansible.builtin.command: systemctl try-reload-or-restart {{ mailman3_web_service_name }}{{ '@' if mailman3_domains is defined else '' }}{{ item }}.service
+  loop: "{{ mailman3_domains | default(['']) }}"
+  when:
+    - mailman3_process_manager == "systemd"
+    - ansible_virtualization_type != "docker"
+  tags:
+    - skip_ansible_lint

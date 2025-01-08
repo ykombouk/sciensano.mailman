@@ -1,0 +1,44 @@
+---
+
+- name: Create/update Mailman Core configuration
+  ansible.builtin.template:
+    src: mailman.cfg.j2
+    dest: "{{ mailman3_core_etc_dir }}/mailman.cfg"
+    group: "{{ __mailman3_core_group_name }}"
+    mode: "0640"
+    backup: "{{ mailman3_backup_configs }}"
+  notify:
+    - Restart mailman3-core service
+
+- name: Create HyperKitty configuration file
+  ansible.builtin.copy:
+    content: |
+      [general]
+      base_url: http://localhost/{{ mailman3_hyperkitty_root | default('hyperkitty/') }}
+      api_key: {{ mailman3_archiver_key }}
+    dest: "{{ mailman3_core_etc_dir }}/hyperkitty.cfg"
+    group: "{{ __mailman3_core_group_name }}"
+    mode: "0640"
+    backup: "{{ mailman3_backup_configs }}"
+  notify:
+    - Restart mailman3-core service
+
+- name: Install custom urls.py
+  ansible.builtin.template:
+    src: "urls.py.j2"
+    mode: "0644"
+    dest: "{{ mailman3_django_project_dir }}/{{ mailman3_django_urls_module_name }}.py"
+    backup: "{{ mailman3_backup_configs }}"
+  when: mailman3_django_urls_module_name
+  notify:
+    - Reload mailman3-web service
+
+- name: Install custom middleware
+  ansible.builtin.copy:
+    src: "middleware.py"
+    mode: "0644"
+    dest: "{{ mailman3_django_project_dir }}/{{ mailman3_django_middleware_module_name }}.py"
+    backup: "{{ mailman3_backup_configs }}"
+  when: mailman3_wsgi_socket.startswith("/")
+  notify:
+    - Reload mailman3-web service

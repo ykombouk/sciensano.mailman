@@ -1,0 +1,22 @@
+---
+
+- name: Create Mailman group
+  ansible.builtin.group:
+    name: "{{ _mailman3_user.group }}"
+    gid: "{{ _mailman3_user.gid | default(omit) }}"
+    system: "{{ _mailman3_user.system | default(omit) }}"
+    local: "{{ _mailman3_user.local | default(omit) }}"
+  when: _mailman3_user.group is defined
+
+- name: Create Mailman user
+  ansible.builtin.user:
+    name: "{{ _mailman3_user.name }}"
+    comment: "{{ _mailman3_user.comment | default(omit) }}"
+    uid: "{{ _mailman3_user.uid | default(omit) }}"
+    group: "{{ _mailman3_user.group | default(omit) }}"
+    groups: "{{ _mailman3_user.groups | default(omit) }}"
+    home: "{{ _mailman3_user.home | default(omit) }}"
+    create_home: "{{ _mailman3_user.create_home | default(omit) }}"
+    shell: "{{ _mailman3_user.shell | default(omit) }}"
+    system: "{{ _mailman3_user.system | default(omit) }}"
+    local: "{{ _mailman3_user.local | default(omit) }}"
